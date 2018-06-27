@@ -1,0 +1,13 @@
+dist: trusty
+sudo: false
+language: android
+python:
+  - "2.7" 
+os:
+  - linux
+  - osx
+script:
+  - ./nixtest.sh
+notifications:
+  slack: appcademy:iHt6U7lzeWrIvYzahPT6rXIz
+
