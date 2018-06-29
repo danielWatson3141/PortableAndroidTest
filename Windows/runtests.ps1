@@ -14,17 +14,13 @@ Write-Host "output file:"
 Write-Host  $outputFile
 
 #start Trepn Service
-Foreach ($phone in $target)
-{
-		.\adb -s $phone shell am startservice com.quicinc.trepn/.TrepnService
-}
+
+		starfish devices control $target shell "am startservice com.quicinc.trepn/.TrepnService"
+
 
 if($args[7]) {
 	#load prefs
-	Foreach ($phone in $target)
-	{
-		.\adb -s $phone shell am broadcast -a com.quicinc.trepn.load_preferences -e com.quicinc.trepn.load_preferences_file -join($trepnPath ,"/saved_preferences/", $prefsFile)
-	}
+	starfish devices control $target shell -join("am broadcast -a com.quicinc.trepn.load_preferences -e com.quicinc.trepn.load_preferences_file ",$trepnPath ,"/saved_preferences/", $prefsFile)
 	Start-Sleep -s 1
  }
 Start-Sleep -s 1 #pause
@@ -37,10 +33,7 @@ Start-Sleep -s 1
 
 For ($i=0; $i -lt $runs ; $i++){
 	if($i -eq $bufferRuns){
-		Foreach ($phone in $target)
-		{
-			.\adb -s $phone shell am broadcast -a com.quicinc.trepn.start_profiling -e com.quicinc.trepn.database_file "trepnTemp" #start profiling
-		}
+			starfish devices control $target shell "am broadcast -a com.quicinc.trepn.start_profiling -e com.quicinc.trepn.database_file "trepnTemp"" #start profiling
 		Write-Host "profile started"
 	}
 
@@ -64,13 +57,14 @@ For ($i=0; $i -lt $runs ; $i++){
 	Write-Host "run completed"
 }
 
-Foreach ($phone in $target)
-{	
-	#stop profiling
-	.\adb -s $phone shell am broadcast -a com.quicinc.trepn.stop_profiling
-	#convert the output to csv
-	.\adb -s $phone shell am broadcast -a com.quicinc.trepn.export_to_csv -e com.quicinc.trepn.export_db_input_file "trepnTemp.db" -e com.quicinc.trepn.export_csv_output_file $outputFile
-	.\adb -s $phone pull $trepnPath (-join((pwd),"\trepn"))
+
+#stop profiling
+starfish devices control $target shell "am broadcast -a com.quicinc.trepn.stop_profiling"
+#convert the output to csv
+starfish devices control $target shell "am broadcast -a com.quicinc.trepn.export_to_csv -e com.quicinc.trepn.export_db_input_file "trepnTemp.db" -e com.quicinc.trepn.export_csv_output_file $outputFile"
+
+Foreach ($phone in $target){
+	.\adb -s $phone pull $trepnPath (-join((pwd),"/trepn"))
 }
-Write-Host "Output successful"
+Write-Host "Output complete"
 #pull output to master machine
