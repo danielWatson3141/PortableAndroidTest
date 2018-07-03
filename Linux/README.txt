@@ -2,7 +2,11 @@ Setup
 
 Open a terminal in this directory.
 
-Make adb and app
+Make adb and appetizer executable.
+
+chmod -x adb
+chmod -x appetizer
+
 Make sure adb is working:
 type "./adb". It should give you a version number.
 
