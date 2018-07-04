@@ -11,12 +11,12 @@ trepnPath=$7 #Trepn directory on Android device
 #trepnPath=$trepnPath"/"$outputFile".csv"
 
 
-./appetizer devices control $target shell "am startservice com.quicinc.trepn/.TrepnService"
+./appetizer devices control $target shell 'am startservice com.quicinc.trepn/.TrepnService'
 
 
 if [ $# -eq 8 ]
 then
-	./appetizer devices control $target shell "am broadcast -a com.quicinc.trepn.load_preferences -e com.quicinc.trepn.load_preferences_file "$trepnPath/saved_preferences/""
+	./appetizer devices control $target shell 'am broadcast -a com.quicinc.trepn.load_preferences -e com.quicinc.trepn.load_preferences_file "$trepnPath/saved_preferences/"'
 	sleep 1
 fi
 
@@ -39,7 +39,7 @@ do
 	then
 		for phone in $target
         do
-		./appetizer devices control $target shell "am broadcast -a com.quicinc.trepn.start_profiling -e com.quicinc.trepn.database_file "trepnTemp"" #start profiling
+		./appetizer devices control $target shell 'am broadcast -a com.quicinc.trepn.start_profiling -e com.quicinc.trepn.database_file "trepnTemp"' #start profiling
 		done
 		echo "profile started"
 	fi
@@ -67,10 +67,10 @@ done
 
 
 #stop profiling
-./appetizer devices control $target shell "am broadcast -a com.quicinc.trepn.stop_profiling"
+./appetizer devices control $target shell 'am broadcast -a com.quicinc.trepn.stop_profiling'
 
 #convert the output to csv
-./appetizer devices control $target shell "am broadcast -a com.quicinc.trepn.export_to_csv -e com.quicinc.trepn.export_db_input_file "trepnTemp.db" -e com.quicinc.trepn.export_csv_output_file $outputFile"
+./appetizer devices control $target shell 'am broadcast -a com.quicinc.trepn.export_to_csv -e com.quicinc.trepn.export_db_input_file "trepnTemp.db" -e com.quicinc.trepn.export_csv_output_file '"$outputFile"
 
 
 for phone in $target

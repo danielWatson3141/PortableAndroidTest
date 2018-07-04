@@ -20,9 +20,7 @@ Settings->Developer Options->USB debugging
 
 In your phone's developer options, enable "Show Touches" and "stay awake" as this will help down the road. (Make sure to disable "stay awake" when you are finished as this can make your phone difficult to charge.)
 
-Plug the phone into your computer
 
-A popup should come up asking you if you want to enable MTP, press yes and, if available, check the box that says "always allow from this computer".
 
 Install Trepn Profiler - available on Google Play Store
 
@@ -44,6 +42,10 @@ Now, we need to find out where trepn has made itself at home on our Android devi
  trepnPath="/Internal storage/trepn"
  
 Sending Commands to the phone
+
+Plug the phone into your computer
+
+A popup should come up asking you if you want to enable MTP, press yes and, if available, check the box that says "always allow from this computer".
 
 Commands can be sent to the phone over the adb(Android Debugging Bridge).
 
