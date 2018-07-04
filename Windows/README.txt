@@ -5,15 +5,17 @@ Open a terminal in this directory.
 shift + right click-> open Powershell Window here 
 
 Make sure adb is working:
-type ".\adb". It should give you a version number.
+type "./adb". It should give you a version number.
 
 Enable usb debugging on the Android device.
 	Settings->Developer Options->USB debugging
 	(You may need to enable developer options by opening Settings->About device and tapping build number seven times.)
 
-(optional, but highly recommended) In your phone's developer options, enable "Show Touches" as this will help down the road.
+In your phone's developer options, enable "Show Touches" and "Stay awake" as this will help down the road. (Make sure to disable "stay awake" when you are finished as this can make your phone difficult to charge.)
 
 Plug the phone into your computer
+
+A popup should come up asking you if you want to enable MTP, press yes and, if available, check the box that says "always allow from this computer".
 
 Install Trepn Profiler - available on Google Play Store
 
@@ -26,11 +28,12 @@ Open trepn and go to settings>Data Points. Remember to save your settings
 I recommend using CPU Load(Normalized), GPU Load, Memory Usage, and Screen State
 
 Screen state is to help with processing (more on that later). The others 
-are relevant performance datapoints. Be sure to save your preferences by 
-hitting general>Save Preferences. Remember what you name this file (or save it to a variable in your console)
+are relevant performance datapoints. 
+
+Be sure to save your preferences by hitting general>Save Preferences. Remember what you name this file (or save it to a variable in your console)
 
 Now, we need to find out where trepn has made itself at home on our Android device.
- Open your phone's file browser and locate the .../trepn directory.
+ Open your phone's file browser (you may need to download and install one like "file manager") and locate the .../trepn directory.
  On my phone, this is /Internal storage/trepn.
  Save this path to a variable:
  $trepnPath = "/Internal storage/trepn"
@@ -39,11 +42,11 @@ Sending Commands to the phone
 
 Commands can be sent to the phone over the adb(Android Debugging Bridge).
 
-Test the link by sending a command to the phone over the .\adb.
+Test the link by sending a command to the phone over the adb.
 
 With the screen off, type:
 
-.\adb shell input keyevent KEYCODE_WAKEUP
+./adb shell input keyevent KEYCODE_WAKEUP
 
 Your phone should activate.
 
@@ -51,16 +54,17 @@ Now find your phone's id, usually the same as the serial number.
 
 Type:
 
-.\starfish devices list
+./starfish devices list
 
-The first item on the list, "uid" is how we will identify the phone. Copy and paste this id (without the quotes) and save it to a variable
+The first item on the list, "uid" is how we will identify the phone. Copy and paste this id (with the quotes) and save it to a variable
 
 $myPhone = %uid%
 
 Any command we can send over the adb, we can send over starfish using the phone's uid. For example:
 
-.\starfish devices control $myPhone shell input keyevent KEYCODE_WAKEUP
+./starfish devices control $myPhone shell input keyevent KEYCODE_WAKEUP
 
+----Optional
 One thing starfish allows us to do that the adb alone does not is control multiple devices at once.
 (This step is optional, but allows you to control multiple phones if you wish.)
 
@@ -68,18 +72,20 @@ We first create an array of uid's:
 $myPhones = $phone1,$phone2,$phone3
 
 Then wake them all up:
-.\starfish devices control $myPhones shell input keyevent KEYCODE_WAKEUP
+./starfish devices control $myPhones shell input keyevent KEYCODE_WAKEUP
+----Optional
+
 
 Recording touch interactions:
-More detail can be found on the GitHub.
+Replaykit can be used to record a series of touchscreen inputs and save them to file to be played back later. More details can be found on the Replaykit Github (link)
 
 Start recording:
-.\starfish trace record --device $myPhone mytrace.trace
+./starfish trace record --device $myPhone mytrace.trace
 
 type 'exit' to stop.
 
 Check the trace (optional):
-.\starfish trace info mytrace.trace
+./starfish trace info mytrace.trace
 
 This gives information about the trace such as duration and number of recorded events.
 If numbers seem off, something isn't working right.
@@ -88,7 +94,7 @@ We can also view and edit the trace file by decompressing(right click -> extract
 is ok with compressed or decompressed trace files but they are compressed by default
 
 Play back the Trace:
-.\starfish trace replay mytrace.trace $myPhone
+./starfish trace replay mytrace.trace $myPhone
 
  
 Scripting Experiments
@@ -96,12 +102,12 @@ Scripting Experiments
 
 Find the package name of the app you want to test:
 
- .\adb shell pm list packages
+ ./adb shell pm list packages
  
  This will show you all packages installed on the device. To narrow the list, apply a filter. 
  For example, if I want to test an app called Glympse, I type:
  
- .\adb shell pm list packages glympse
+ ./adb shell pm list packages glympse
  
  And I get back:
  
@@ -122,35 +128,35 @@ This script has 7 arguments and an optional 8th. They are:
 
 -target phone uid
 -trace to run
--time to run experiment
+-times to run experiment
 -times to run experiment before triggering trepn (more on this later)
 -app to test
 -name of output file
 -path to trepn directory on device.
 -(optional) name of .pref file to use without path
 
- .\runtests $myPhone mytrace.trace 5 0 $myapp myProfile $trepnPath
+ ./runtests $myPhone mytrace.trace 3 0 $myapp myProfile $trepnPath
 
-This will launch your target app and run your trace 5 times while profiling it with Trepn.
+This will launch your target app and run your trace 3 times while profiling it with Trepn.
 Once it has completed its execution 5 times, it will save Trepn's output as a csv, which 
 then be pulled into your working directory. Each Experiment(set of runs) generates 1 csv file
 which can then be processed in Excel, R, Matlab, or your spreadsheet software of choice.
 
 Advanced Usage
 
-Open runtests with your preferred text editor or IDE.
+Open runtests.ps1 with your preferred text editor or IDE.
 
 We can make our experiments more complex by adding other inputs like button presses and text.
 
- .\starfish devices control $target shell input keyevent KEYCODE_ENTER #--press enter
- .\starfish devices control $target shell input touchscreen text $city #--type something
+ ./starfish devices control $target shell input keyevent KEYCODE_ENTER #--press enter
+ ./starfish devices control $target shell input touchscreen text $city #--type something
 
- More actions can be found here: https://gist.github.com/Pulimet/5013acf2cd5b28e55036c82c91bd56d8
+ A complete reference of adb actions can be found here: https://gist.github.com/Pulimet/5013acf2cd5b28e55036c82c91bd56d8
  
  To send these events to multiple devices, just replace adb with 
- .\starfish devices control $target.
+ ./starfish devices control $target.
  
- 
+
 Designing Experiments
  To set up an experiment, first decide:
 
@@ -179,19 +185,36 @@ I do not mean to suggest we cannot use the tool to perform tests on these apps,
 but our sample variance is likely to be much higher and possibly more sensitive to small variations
 in experimental technique. Draw conclusions with caution when testing such apps.
 
-Once you've chosen an app to profile, decide what interactions to test. Consider:
--Does this set of interactions sufficiently resemble a typical use case?
--Should this set of interactions consistently give us the same response?
+Once you've chosen an app to profile, decide what interactions to test. It is best to design a test that is both representative of actual use conditions, and repeatable. That is, the same response by the app can be expected each time from the given input. 
+
+
+Before designing your experiment, answer the following:
+
+Does this set of interactions sufficiently resemble an interesting use case?
+Should this set of interactions consistently give us the same response?
+How will activities such as caching affect the measurements I'm taking? Will this effect obscure my results?
+How big of an observer effect might Trepn be having on my phone and is it large enough to prevent me observing what I want? This depends on the hardware, as older or more sluggish phones may be more affected by Trepn's activities.
+
+Once you have decided on an experiment:
+1.Boot the app
+2.Record your interactions
+3.call runtests.ps1 again with your chosen app and trace file to see how it goes.
+
+To add other events or traces:
+In the script, you should only edit the code between when the app is launched and when the app is closed.
+Some examples of things you can script without too much code:
+
+-record multiple traces for different purposes (or for some kind of randomized trial). Just treat the $trace parameter as an array and pass it an array of trace files when you run it.
+
+-Call monkey for random screen events. This can help look for bugs or performance bottlenecks.
+
 
 Example:
 
-Open propertyExp.ps1. In this file, we've scripted an experiment to test a very simple listview
+Open Windows/propertyExp.ps1. In this file, we've scripted an experiment to test a very simple listview
 demonstration app, like the one found here:
 https://www.raywenderlich.com/178012/react-native-tutorial-building-android-apps-javascript
 Our script clears the text box, types in the name of a city (from a list of 3), presses enter, then scrolls the list up and down for a little while,
 before hitting the back button and returning to the main screen to repeat the process for the three cities
 
-This allows us to profile the scrolling behavriour, but also how the app behaves 
-while making http requests.
-
-
+This allows us to profile the scrolling behavriour, but also how the app behaves while making http requests.
