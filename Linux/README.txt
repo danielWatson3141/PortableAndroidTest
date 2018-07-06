@@ -36,10 +36,10 @@ Screen state is to help with processing (more on that later). The others are rel
 Be sure to save your preferences by hitting general>Save Preferences. Remember what you name this file (or save it to a variable in your console)
 
 Now, we need to find out where trepn has made itself at home on our Android device.
- Open your phone's file browser (you may need to download and install one like "file manager") and locate the .../trepn directory.
- On my phone, this is /Internal storage/trepn.
- Save this path to a variable in your terminal:
- trepnPath="/Internal storage/trepn"
+Open your phone's file browser (you may need to download and install one like "file manager") and locate the .../trepn directory.
+On my phone, this is /Internal storage/trepn.
+Save this path to a variable in your terminal:
+trepnPath="/Internal storage/trepn"
  
 Sending Commands to the phone
 
@@ -67,11 +67,11 @@ The first item on the list, "uid" is how we will identify the phone. Copy and pa
 
 myPhone="abc123"
 
-Any command we can send over the adb, we can send over ./appetizer using the phone's uid. For example, with the phone off, type:
+Any command we can send over the adb, we can send over appetizer using the phone's uid. For example, with the phone screen off, type:
 
 ./appetizer devices control $myPhone shell input keyevent KEYCODE_WAKEUP
 
-One thing ./appetizer allows us to do that the adb alone does not is control multiple devices at once.
+One thing appetizer allows us to do that the adb alone does not is control multiple devices at once.
 (This step is optional, but allows you to control multiple phones if you wish.)
 
 We first create an array of uid's:
@@ -94,20 +94,19 @@ Check the trace (optional):
 This gives information about the trace such as duration and number of recorded events.
 If numbers seem off, something isn't working right.
 
-We can also view and edit the trace file by decompressing it, then opening it with a text editor. Replaykit runs fine with compressed or decompressed trace files but they are compressed by default. To decompress the file:
+We can also view and edit the trace file by decompressing it, then opening it with a text editor. 
 
-Make the extension .gz:
-mv testTrace.trace testTrace.trace.gz 
+(Optional) Extract using zcat:
+zcat mytrace.trace
 
-Extract using gzip:
-gzip -d testTrace.trace.gz
+Replaykit runs fine with compressed or decompressed trace files but they are compressed by default.
+
 
 Play back the Trace:
 ./appetizer trace replay mytrace.trace $myPhone
 
  
 Scripting Experiments
-
 
 Find the package name of the app you want to test:
 
@@ -148,8 +147,7 @@ This script has 7 arguments and an optional 8th. They are:
  ./runtests.sh $myPhone mytrace.trace 3 0 $myapp myProfile $trepnPath
 
 This will launch your target app and run your trace 3 times while profiling it with Trepn.
-Once it has completed its execution 5 times, it will save Trepn's output as a csv, which 
-then be pulled into your working directory. Each Experiment(set of runs) generates 1 csv file
+Once it has completed its execution 3 times, it will save Trepn's output as a csv, which will then be pulled into your working directory. Each Experiment(set of runs) generates 1 csv file
 which can then be processed in Excel, R, Matlab, or your spreadsheet software of choice.
 
 Advanced Usage
@@ -204,12 +202,13 @@ Before designing your experiment, answer the following:
 Does this set of interactions sufficiently resemble an interesting use case?
 Should this set of interactions consistently give us the same response?
 How will activities such as caching affect the measurements I'm taking? Will this effect obscure my results?
+
 How big of an observer effect might Trepn be having on my phone and is it large enough to prevent me observing what I want? This depends on the hardware, as older or more sluggish phones may be more affected by Trepn's activities.
 
 Once you have decided on an experiment:
 1.Boot the app
 2.Record your interactions
-3.call runtests.ps1 again with your chosen app and trace file to see how it goes.
+3.call runtests.sh again with your chosen app and trace file to see how it goes.
 
 To add other events or traces:
 In the script, you should only edit the code between when the app is launched and when the app is closed.

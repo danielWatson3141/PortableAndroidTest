@@ -76,9 +76,7 @@ done
 for phone in $target
 do
 #pull output to master machine
-mkdir trepn
-destPath="/trepn"
 pwd=$(pwd)
-./adb -s $phone pull $trepnPath "$pwd$destPath"
+./adb -s $phone pull $trepnPath$pwd
 done
 echo "Output successful"
