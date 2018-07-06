@@ -12,7 +12,7 @@ Enable developer options on the Android device.
 	tap build number seven times.
 	
 Enable the following developer options. They appear in the developer options menu in this order:
-	-Stay Awake
+	-Stay AwakeA
 	-USB debugging
 	-USB configuration: MTP (Usually you can select from a list of options. Select MTP (Media transfer Protocol))
 	-Show Touches
