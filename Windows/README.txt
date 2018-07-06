@@ -5,25 +5,38 @@ Open a terminal in this directory.
 shift + right click-> open Powershell Window here 
 
 Make sure adb is working:
-type "./adb". It should give you a version number.
+type "./adb". It should give you usage information.
 
-Enable usb debugging on the Android device.
-	Settings->Developer Options->USB debugging
-	(You may need to enable developer options by opening Settings->About device and tapping build number seven times.)
+Enable developer options on the Android device.
+	Settings->About device 
+	tap build number seven times.
+	
+Enable the following developer options. They appear in the developer options menu in this order:
+	-Stay Awake
+	-USB debugging
+	-USB configuration: MTP (Usually you can select from a list of options. Select MTP (Media transfer Protocol))
+	-Show Touches
 
-In your phone's developer options, enable "Show Touches" and "Stay awake" as this will help down the road. (Make sure to disable "stay awake" when you are finished as this can make your phone difficult to charge.)
-
-Install Trepn Profiler - available on Google Play Store
+Disable immediate screen lock.
+	-If you have your security settings set to lock the phone immediately on screen shutdown, this must be set to a delay of 1 minute or more.
+	-This setting is found in Settings->Lock Screen and security->Secure Lock Settings, although this may differ by manufacturer.
+	
+Install Trepn Profiler - available on Google Play Store, also installable from the apk in PortableAndroidTest/
 
 Configuring Trepn
 
 Once installed, we need to configure Trepn to record what we want to measure.
-Open trepn and go to settings>Data Points. Remember to save your settings
+Open trepn.
+Open advanced mode by hitting the beaker at the top corner and go to settings>Data Points(tab). Remember to save your settings
 
+I recommend using:
+CPU Load(Normalized) - Percent of CPU utilization with respect to maximum theorhetical capacity. This accounts for things like temperature and low battery conditions.
+GPU Load - Percent of GPU capacity utilized.
+Memory Usage - Total memory occupied in Kb
+Battery power - Rate of battery consumption in mW
+and Screen State - Screen on or off, boolean value.
 
-I recommend using CPU Load(Normalized), GPU Load, Memory Usage, and Screen State
-
-Screen state is to help with processing (more on that later). The others 
+Screen state is to help with processing. The others 
 are relevant performance datapoints. 
 
 Be sure to save your preferences by hitting general>Save Preferences. Remember what you name this file (or save it to a variable in your console)
@@ -89,13 +102,17 @@ Check the trace (optional):
 ./starfish trace info mytrace.trace
 
 This gives information about the trace such as duration and number of recorded events.
-If numbers seem off, something isn't working right.
+If numbers there are all zero, something isn't working right.
 
+Viewing trace files
 We can also view and edit the trace file by decompressing(right click -> extract archive...) it, then opening it with a text editor. Replaykit
 is ok with compressed or decompressed trace files but they are compressed by default
 
+We can then open the trace file and view its contents. Each row represents a brief instant of a touch on the screen. Each line gives a timestamp, coordinates, and a pressure reading. These values can all be edited manually or programatically to generate or modify trace files. 
+
 Play back the Trace:
 ./starfish trace replay mytrace.trace $myPhone
+
 
  
 Scripting Experiments
@@ -219,3 +236,8 @@ Our script clears the text box, types in the name of a city (from a list of 3), 
 before hitting the back button and returning to the main screen to repeat the process for the three cities
 
 This allows us to profile the scrolling behavriour, but also how the app behaves while making http requests.
+
+
+Resetting the phone
+
+To undo the settings we enabled for this demo, open Settings->Developer Options and there is an option to disable them all at the top. Remember to return your security settings to their previous state as well.

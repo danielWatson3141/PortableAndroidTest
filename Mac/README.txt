@@ -12,34 +12,41 @@ Add present working directory to PATH:
 export PATH=$PATH:$(pwd)
 
 Make sure adb is working:
-type "./adb". It should give you a version number and some other things.
+type "./adb". It should give you usage information.
 
-Enable usb debugging on the Android device.
-Settings->Developer Options->USB debugging
-	(You may need to enable developer options by opening Settings->About device and tapping build number seven times.)
+Enable developer options on the Android device.
+	Settings->About device 
+	tap build number seven times.
+	
+Enable the following developer options. They appear in the developer options menu in this order:
+:
+	-Stay Awake
+	-USB debugging
+	-USB configuration: MTP (Usually you can select from a list of options. Select MTP (Media transfer Protocol))
+	-Show Touches
 
-In your phone's developer options, enable "Show Touches" and "stay awake" as this will help down the road. (Make sure to disable "stay awake" when you are finished as this can make your phone difficult to charge.)
-
-
-
-Install Trepn Profiler - available on Google Play Store
+Install Trepn Profiler - available on Google Play Store, also installable from the apk in PortableAndroidTest/
 
 Configuring Trepn
 
 Once installed, we need to configure Trepn to record what we want to measure.
-Open trepn and go to settings>Data Points. Remember to save your settings
+Open trepn.
+Open advanced mode by hitting the beaker at the top corner and go to settings>Data Points(tab). Remember to save your settings
 
-I recommend using CPU Load(Normalized), GPU Load, Memory Usage, and Screen State
+I recommend using:
+CPU Load(Normalized) - Percent of CPU utilization with respect to maximum theorhetical capacity. This accounts for things like temperature and low battery conditions.
+GPU Load - Percent of GPU capacity utilized.
+Memory Usage - Total memory occupied in Kb
+Battery power - Rate of battery consumption in mW
+and Screen State - Screen on or off, boolean value. This is useful as a delimeter to separate trials in our trace.
 
-Screen state is to help with processing (more on that later). The others are relevant performance datapoints. 
-
-Be sure to save your preferences by hitting general>Save Preferences. Remember what you name this file (or save it to a variable in your console)
+Be sure to save your preferences by hitting general(tab)>Save Preferences. Remember what you name this file (or save it to a variable in your console)
 
 Now, we need to find out where trepn has made itself at home on our Android device.
- Open your phone's file browser (you may need to download and install one like "file manager") and locate the .../trepn directory.
- On my phone, this is /Internal storage/trepn.
- Save this path to a variable in your terminal:
- trepnPath="/Internal storage/trepn"
+Open your phone's file browser (you may need to download and install one like "file manager") and locate the .../trepn directory.
+On my phone, this is /Internal storage/trepn.
+Save this path to a variable in your terminal:
+trepnPath="/Internal storage/trepn"
  
 Sending Commands to the phone
 
@@ -67,11 +74,11 @@ The first item on the list, "uid" is how we will identify the phone. Copy and pa
 
 myPhone="abc123"
 
-Any command we can send over the adb, we can send over ./appetizer using the phone's uid. For example, with the phone off, type:
+Any command we can send over the adb, we can send over appetizer using the phone's uid. For example, with the phone screen off, type:
 
 ./appetizer devices control $myPhone shell input keyevent KEYCODE_WAKEUP
 
-One thing ./appetizer allows us to do that the adb alone does not is control multiple devices at once.
+One thing appetizer allows us to do that the adb alone does not is control multiple devices at once.
 (This step is optional, but allows you to control multiple phones if you wish.)
 
 We first create an array of uid's:
@@ -92,22 +99,24 @@ Check the trace (optional):
 ./appetizer trace info mytrace.trace
 
 This gives information about the trace such as duration and number of recorded events.
-If numbers seem off, something isn't working right.
+If the numbers there are all zero, something isn't working right.
 
-We can also view and edit the trace file by decompressing it, then opening it with a text editor. Replaykit runs fine with compressed or decompressed trace files but they are compressed by default. To decompress the file:
+Viewing trace files
+We can also view and edit the trace file by decompressing it, then opening it with a text editor. 
 
-Make the extension .gz:
-mv testTrace.trace testTrace.trace.gz 
+(Optional) Extract using zcat:
+zcat mytrace.trace
 
-Extract using gzip:
-gzip -d testTrace.trace.gz
+Replaykit runs fine with compressed or decompressed trace files but they are compressed by default. NOTE: We have had problems running decompressed trace files on MAC specifically.
+
+We can then open the trace file and view its contents. Each row represents a brief instant of a touch on the screen. Each line gives a timestamp, coordinates, and a pressure reading. These values can all be edited manually or programatically to generate or modify trace files. 
+
 
 Play back the Trace:
 ./appetizer trace replay mytrace.trace $myPhone
 
  
 Scripting Experiments
-
 
 Find the package name of the app you want to test:
 
@@ -148,8 +157,7 @@ This script has 7 arguments and an optional 8th. They are:
  ./runtests.sh $myPhone mytrace.trace 3 0 $myapp myProfile $trepnPath
 
 This will launch your target app and run your trace 3 times while profiling it with Trepn.
-Once it has completed its execution 5 times, it will save Trepn's output as a csv, which 
-then be pulled into your working directory. Each Experiment(set of runs) generates 1 csv file
+Once it has completed its execution 3 times, it will save Trepn's output as a csv, which will then be pulled into your working directory. Each Experiment(set of runs) generates 1 csv file
 which can then be processed in Excel, R, Matlab, or your spreadsheet software of choice.
 
 Advanced Usage
@@ -204,12 +212,13 @@ Before designing your experiment, answer the following:
 Does this set of interactions sufficiently resemble an interesting use case?
 Should this set of interactions consistently give us the same response?
 How will activities such as caching affect the measurements I'm taking? Will this effect obscure my results?
+
 How big of an observer effect might Trepn be having on my phone and is it large enough to prevent me observing what I want? This depends on the hardware, as older or more sluggish phones may be more affected by Trepn's activities.
 
 Once you have decided on an experiment:
 1.Boot the app
 2.Record your interactions
-3.call runtests.ps1 again with your chosen app and trace file to see how it goes.
+3.call runtests.sh again with your chosen app and trace file to see how it goes.
 
 To add other events or traces:
 In the script, you should only edit the code between when the app is launched and when the app is closed.
@@ -229,6 +238,10 @@ Our script clears the text box, types in the name of a city (from a list of 3), 
 before hitting the back button and returning to the main screen to repeat the process for the three cities
 
 This allows us to profile the scrolling behavriour, but also how the app behaves while making http requests.
+
+Resetting the phone
+
+To undo the settings we enabled for this demo, open Settings->Developer Options and there is an option to disable them all at the top. Remember to return your security settings to their previous state as well.
 
 
 

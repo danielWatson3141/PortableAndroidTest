@@ -12,28 +12,33 @@ Add present working directory to PATH:
 export PATH=$PATH:$(pwd)
 
 Make sure adb is working:
-type "./adb". It should give you a version number and some other things.
+type "./adb". It should give you usage information.
 
-Enable usb debugging on the Android device.
-Settings->Developer Options->USB debugging
-	(You may need to enable developer options by opening Settings->About device and tapping build number seven times.)
-
-In your phone's developer options, enable "Show Touches" and "stay awake" as this will help down the road. (Make sure to disable "stay awake" when you are finished as this can make your phone difficult to charge.)
-
-
+Enable developer options on the Android device.
+	Settings->About device 
+	tap build number seven times.
+	
+Enable the following developer options:
+	-USB debugging
+	-Stay Awake
+	-Show Touches
 
 Install Trepn Profiler - available on Google Play Store
 
 Configuring Trepn
 
 Once installed, we need to configure Trepn to record what we want to measure.
-Open trepn and go to settings>Data Points. Remember to save your settings
+Open trepn.
+Open advanced mode by hitting the beaker at the top corner and go to settings>Data Points(tab). Remember to save your settings
 
-I recommend using CPU Load(Normalized), GPU Load, Memory Usage, and Screen State
+I recommend using:
+CPU Load(Normalized) - Percent of CPU utilization with respect to maximum theorhetical capacity. This accounts for things like temperature and low battery conditions.
+GPU Load - Percent of GPU capacity utilized.
+Memory Usage - Total memory occupied in Kb
+Battery power - Rate of battery consumption in mW
+and Screen State - Screen on or off, boolean value. This is useful as a delimeter to separate trials in our trace.
 
-Screen state is to help with processing (more on that later). The others are relevant performance datapoints. 
-
-Be sure to save your preferences by hitting general>Save Preferences. Remember what you name this file (or save it to a variable in your console)
+Be sure to save your preferences by hitting general(tab)>Save Preferences. Remember what you name this file (or save it to a variable in your console)
 
 Now, we need to find out where trepn has made itself at home on our Android device.
 Open your phone's file browser (you may need to download and install one like "file manager") and locate the .../trepn directory.
@@ -92,14 +97,17 @@ Check the trace (optional):
 ./appetizer trace info mytrace.trace
 
 This gives information about the trace such as duration and number of recorded events.
-If numbers seem off, something isn't working right.
+If the numbers there are all zero, something isn't working right.
 
+Viewing trace files
 We can also view and edit the trace file by decompressing it, then opening it with a text editor. 
 
 (Optional) Extract using zcat:
 zcat mytrace.trace
 
-Replaykit runs fine with compressed or decompressed trace files but they are compressed by default.
+Replaykit runs fine with compressed or decompressed trace files but they are compressed by default. NOTE: We have had problems running decompressed trace files on MAC specifically.
+
+We can then open the trace file and view its contents. Each row represents a brief instant of a touch on the screen. Each line gives a timestamp, coordinates, and a pressure reading. These values can all be edited manually or programatically to generate or modify trace files. 
 
 
 Play back the Trace:
@@ -228,6 +236,10 @@ Our script clears the text box, types in the name of a city (from a list of 3), 
 before hitting the back button and returning to the main screen to repeat the process for the three cities
 
 This allows us to profile the scrolling behavriour, but also how the app behaves while making http requests.
+
+Resetting the phone
+
+To undo the settings we enabled for this demo, open Settings->Developer Options and there is an option to disable them all at the top. Remember to return your security settings to their previous state as well.
 
 
 
